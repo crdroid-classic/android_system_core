@@ -352,6 +352,12 @@ static int memfd_create_region(const char* name, size_t size) {
         return -1;
     }
 
+    // forbid size changes to match ashmem behaviour
+    if (fcntl(fd, F_ADD_SEALS, F_SEAL_GROW | F_SEAL_SHRINK) == -1) {
+        ALOGE("memfd_create(%s, %zd) F_ADD_SEALS failed: %m", name, size);
+        return -1;
+    }
+
     if (debug_log) {
         ALOGE("memfd_create(%s, %zd) success. fd=%d", name, size, fd.get());
     }
